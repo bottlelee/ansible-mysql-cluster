@@ -1,0 +1,14 @@
+- name: Setup DNS servers
+  lineinfile:
+    path: "/etc/resolvconf/resolv.conf.d/head"
+    line: "{{ item }}"
+  with_items:
+    - "nameserver {{ dns_servers[0] }}"
+    - "nameserver {{ dns_servers[1] }}"
+  register: resolvconf
+
+- name: Restarting resolvconf service
+  service:
+    name: resolvconf
+    state: restarted
+  when: resolvconf is changed

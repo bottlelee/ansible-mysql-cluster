@@ -1,0 +1,8 @@
+- block:
+    - name: Checking service 'mysql'
+      service:
+        name: mysql-server
+        state: started
+    - wait_for:
+        host: "{{ bind_address }}"
+        port: 3306

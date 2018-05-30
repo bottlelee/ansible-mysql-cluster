@@ -1,0 +1,9 @@
+# If the urls failed, find new urls from https://pkgs.org/
+
+# jre download url from https://www.java.com/en/download/linux_manual.jsp
+jre_url: http://javadl.oracle.com/webapps/download/AutoDL?BundleId=233162_512cd62ec5174c3487ac17c61aaa89e8
+jre_version: 1.8.0_171
+
+# MySQL Cluster download urls
+cluster_server_deb_urls:
+  - https://dev.mysql.com/get/Downloads/MySQL-Cluster-7.5/mysql-cluster-community-server_7.5.10-1ubuntu16.04_amd64.deb

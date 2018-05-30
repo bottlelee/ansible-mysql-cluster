@@ -1,0 +1,38 @@
+- block:
+    - name: Creating /usr/java
+      file:
+        path: /usr/java
+        state: directory
+    - name: "Extracting jre-{{ jre_version }}-linux-x64.tar.gz"
+      unarchive:
+        src: "downloaded_files/jre-{{ jre_version }}-linux-x64.tar.gz"
+        dest: /usr/java
+        owner: root
+        group: root
+    - name: Create soft link
+      file:
+        src: "/usr/java/jre{{ jre_version }}/bin/java"
+        dest: /usr/bin/java
+        owner: root
+        group: root
+        state: link
+  rescue:
+    - name: Creating local directory 'downloaded_files'
+      file:
+        path: downloaded_files
+        state: directory
+      delegate_to: localhost
+      become: no
+      run_once: yes
+    - name: "Downloading jre-{{ jre_version }}-linux-x64.tar.gz from {{ jre_url }}"
+      get_url:
+        url: "{{ jre_url }}"
+        dest: "downloaded_files/jre-{{ jre_version }}-linux-x64.tar.gz"
+      register: download
+      until: download is succeeded
+      retries: 99
+      delay: 10
+      delegate_to: localhost
+      become: no
+      run_once: yes
+    - include_tasks: jre.yml

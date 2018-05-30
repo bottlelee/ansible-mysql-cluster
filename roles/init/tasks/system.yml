@@ -1,0 +1,18 @@
+- name: "Checking {{ bind_interface }}"
+  fail:
+    msg: "interface {{ bind_interface }} has no IP address"
+  when: hostvars[inventory_hostname]['ansible_' + bind_interface]['ipv4']['address'] == ''
+
+- include_vars:
+    file: sysctl_rules.yml
+
+- name: Setup sysctl
+  sysctl:
+    name: '{{ item.name }}'
+    value: '{{ item.value }}'
+    ignoreerrors: yes
+  with_items: "{{ sysctl_rules }}"
+
+- name: "Setup timezone to {{ timezone }}"
+  timezone:
+    name: '{{ timezone }}'
