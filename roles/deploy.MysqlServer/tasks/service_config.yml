@@ -6,7 +6,10 @@
     value: "{{ item.v }}"
     state: present
     backup: yes
-  with_items: "{{ mysql_mysqld_config }}"
+  with_items:
+    - "{{ mysql_mysqld_config | sort(attribute='k') }}"
+    - k: innodb_buffer_pool_size
+      v: "{{ (ansible_memtotal_mb * innodb_buffer_pool_size_percent * 1024 * 1024) | int }}"
   when:
     - item.v is defined
     - (item.v | lower | string) != 'false'
@@ -20,7 +23,7 @@
     state: present
     insertafter: "\\[mysqld\\]"
     backup: yes
-  with_items: "{{ mysql_mysqld_config }}"
+  with_items: "{{ mysql_mysqld_config | sort(attribute='k') }}"
   when: item.v is undefined
   notify: Restart mysql
 
@@ -35,13 +38,4 @@
   when:
     - item.v is defined
     - (item.v | lower | string) == 'false'
-  notify: Restart mysql
-
-- name: Set innodb_buffer_pool_size
-  ini_file:
-    path: /etc/mysql/mysql.conf.d/mysqld.cnf
-    section: mysqld
-    option: "innodb_buffer_pool_size"
-    value: "{{ (ansible_memtotal_mb * innodb_buffer_pool_size_percent * 1024 * 1024) | int }}"
-    backup: yes
   notify: Restart mysql

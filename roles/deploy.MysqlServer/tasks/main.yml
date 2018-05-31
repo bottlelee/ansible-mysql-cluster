@@ -10,5 +10,6 @@
   rescue:
     - include_tasks: "{{ ansible_os_family }}.yml"
     - include_tasks: init_config.yml
+    - include_tasks: fio_test.yml
 
 - include_tasks: service_config.yml

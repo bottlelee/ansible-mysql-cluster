@@ -1,11 +1,3 @@
-- name: Installing python packages | Debian
-  apt:
-    name: "{{ item }}"
-  with_items:
-    - python-mysqldb
-    - python-pexpect
-  when: ansible_os_family == 'Debian'
-
 - name: Update MySQL root password for all root accounts
   mysql_user:
     login_user: root

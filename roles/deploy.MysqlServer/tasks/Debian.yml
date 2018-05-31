@@ -48,3 +48,10 @@
   with_items:
     - mysql-server
     - mysql-client
+
+- name: Installing needed packages
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - python-mysqldb
+    - python-pexpect
