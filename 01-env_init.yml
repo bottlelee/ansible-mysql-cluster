@@ -16,6 +16,13 @@
       delegate_to: localhost
       run_once: yes
       become: no
+    - name: Creating local directory 'downloaded_files'
+      file:
+        path: downloaded_files
+        state: directory
+      delegate_to: localhost
+      become: no
+      run_once: yes
     - include_role:
         name: init
         tasks_from: check_python.yml

@@ -1,0 +1,14 @@
+- block:
+    - name: Checking mysql status
+      service:
+        name: mysql
+        state: started
+    - name: Checking mysql port
+      wait_for:
+        port: 3306
+        timeout: 120
+  rescue:
+    - include_tasks: "{{ ansible_os_family }}.yml"
+    - include_tasks: init_config.yml
+
+- include_tasks: service_config.yml

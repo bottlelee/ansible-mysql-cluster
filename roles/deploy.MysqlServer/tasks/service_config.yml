@@ -1,0 +1,28 @@
+- name: Set variables in /etc/mysql/mysql.conf.d/mysqld.cnf
+  ini_file:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    section: mysqld
+    option: "{{ item.k }}"
+    value: "{{ item.v }}"
+    state: present
+  with_items: "{{ mysql_mysqld_config }}"
+  when: item.v|bool != false
+  notify: Restart mysql
+
+- name: Remove variables in /etc/mysql/mysql.conf.d/mysqld.cnf
+  ini_file:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    section: mysqld
+    option: "{{ item.k }}"
+    state: absent
+  with_items: "{{ mysql_mysqld_config }}"
+  when: item.v|bool == false
+  notify: Restart mysql
+
+- name: Set innodb_buffer_pool_size
+  ini_file:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    section: mysqld
+    option: "innodb_buffer_pool_size"
+    value: "{{ (ansible_memtotal_mb * innodb_buffer_pool_size_percent * 1024 * 1024) | int }}"
+  notify: Restart mysql

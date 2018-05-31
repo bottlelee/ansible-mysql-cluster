@@ -1,21 +1,22 @@
-{% if 'managers' in group_names %}
+{% if 'routers' in group_names %}
 
-{%- for item in groups['managers'] if item != inventory_hostname %}
-server {{ item }}.node.{{ consul_dc_name }}.consul
+{% for item in groups['routers'] if item != inventory_hostname %}
+server {{ hostvars[item]['bind_address'] }}
 {% endfor %}
 local stratum 8 orphan
-#smoothtime 400 0.01
 manual
-initstepslew 1 {% for item in groups['managers'] if item != inventory_hostname %}{{ item }}.node.{{ consul_dc_name }}.consul {% endfor %}
+initstepslew 1 {% for item in groups['routers'] if item != inventory_hostname %}{{ hostvars[item]['bind_address'] }} {% endfor %}
 
 {% else %}
 
-{% for item in groups['managers'] %}
-server {{ item }}.node.{{ consul_dc_name }}.consul iburst
+{% for item in groups['routers'] %}
+server {{ hostvars[item]['bind_address'] }} iburst
 {% endfor %}
+
 makestep 1.0 3
 
 {% endif %}
+
 allow {{ bind_network }}/24
 driftfile /var/lib/chrony/drift
 rtcsync

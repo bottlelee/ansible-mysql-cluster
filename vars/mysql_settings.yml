@@ -1,0 +1,22 @@
+mysql_version: 5.7
+mysql_root_pass: quanduan
+mysql_data_dir: /var/lib/mysql
+mysql_port: 3306
+
+# Adjust the buffer pool value here, 50%-70% of total RAM.
+# This will set the 'innodb_buffer_pool_size' in mysqld.cnf.
+innodb_buffer_pool_size_percent: 0.7
+
+# http://dev.mysql.com/downloads/repo/apt/
+mysql_apt_config_url: https://dev.mysql.com/get/mysql-apt-config_0.8.10-1_all.deb
+
+# Those below config will add or replace in mysqld.conf, section [mysqld]
+# Set the v to 'false' if you want to remove the settings.
+mysql_mysqld_config:
+  - {k: bind-address, v: 0.0.0.0}
+  - {k: innodb_log_file_size, v: 256M}
+  - {k: innodb_flush_method, v: O_DIRECT}
+  - {k: default_storage_engine, v: InnoDB}
+  - {k: innodb_flush_log_at_trx_commit, v: 1}
+  - {k: sync_binlog, v: 1}
+  - {k: innodb_buffer_pool_instances, v: 8}

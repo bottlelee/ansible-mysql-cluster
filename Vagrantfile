@@ -7,7 +7,7 @@ Vagrant.require_version ">= 2.0.0"
 
 $vm_box = "ubuntu/xenial64"
 # $vm_box = "centos/7"
-$instances = 9
+$instances = 5
 $apt_proxy = "http://192.168.205.12:3142"
 
 Vagrant.configure("2") do |config|
@@ -34,18 +34,18 @@ Vagrant.configure("2") do |config|
 
   (1..$instances).each do |instance_id|
     if instance_id <= 3
-      $vm_name = "mysql-cluster-mgmd-#{instance_id.to_s.rjust(2, '0')}"
-    elsif instance_id <=6
-      $vm_name = "mysql-cluster-mysqld-#{instance_id.to_s.rjust(2, '0')}"
-    elsif instance_id > 6
-      $vm_name = "mysql-cluster-ndbd-#{instance_id.to_s.rjust(2, '0')}"
+      $vm_name = "mysql-server-#{instance_id.to_s.rjust(2, '0')}"
+    elsif instance_id == 4
+      $vm_name = "mysql-router-#{instance_id.to_s.rjust(2, '0')}"
+    elsif instance_id == 5
+      $vm_name = "mysql-shell-#{instance_id.to_s.rjust(2, '0')}"
     end
 
     config.vm.define vm_name = $vm_name do |config|
       config.vm.hostname = vm_name
       config.vm.network "private_network", ip: "172.28.128.1#{instance_id.to_s.rjust(2, '0')}"
 
-      if $vm_name == "mysql-cluster-mgmd-#{instance_id.to_s.rjust(2, '0')}"
+      if $vm_name == "mysql-router-#{instance_id.to_s.rjust(2, '0')}"
         config.vm.network "forwarded_port", guest: 3306, host: 3306,
           auto_correct: true
       end
@@ -61,9 +61,9 @@ Vagrant.configure("2") do |config|
       if instance_id == $instances
         config.vm.provision "ansible" do |ansible|
           ansible.groups = {
-            "mgmds" => ["mysql-cluster-mgmd-[01:03]"],
-            "mysqlds" => ["mysql-cluster-mysqld-[04:06]"],
-            "ndbds" => ["mysql-cluster-ndbd-[07:$instances]"]
+            "servers" => ["mysql-server-[01:03]"],
+            "routers" => ["mysql-router-04"],
+            "shells" => ["mysql-shell-05"]
           }
           ansible.limit = "all"
           ansible.playbook = "play-all.yml"
