@@ -12,5 +12,5 @@ downloaded_files
 *.log
 .fact_caching
 host_vars/*.yml
-deploy_report
+install_report
 group_vars/all.yml

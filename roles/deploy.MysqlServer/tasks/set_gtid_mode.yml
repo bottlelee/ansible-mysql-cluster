@@ -32,6 +32,3 @@
     variable: gtid_mode
     value: "ON"
   when: gtidMode.msg == 'ON_PERMISSIVE'
-
-- debug:
-    var: gtidMode

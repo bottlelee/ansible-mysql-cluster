@@ -32,7 +32,8 @@ bind-address    = 0.0.0.0
 symbolic-links  = 0
 
 innodb_buffer_pool_size = {{ (ansible_memtotal_mb * innodb_buffer_pool_size_percent * 1024 * 1024) | int }}
-{% for item in mysql_mysqld_config | sort(attribute='k') %}
+
+{% for item in mysql_mysqld_config  | sort(attribute='k') %}
 {% if item.v is not defined %}
 {{ item.k }}
 {% else %}

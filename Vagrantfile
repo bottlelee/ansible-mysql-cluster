@@ -47,7 +47,7 @@ Vagrant.configure("2") do |config|
       config.vm.hostname = vm_name
       config.vm.network "private_network", ip: "172.28.128.1#{instance_id.to_s.rjust(2, '0')}"
 
-      if $vm_name == "mysql-router-#{instance_id.to_s.rjust(2, '0')}"
+      if $vm_name == "mysql-master-#{instance_id.to_s.rjust(2, '0')}"
         config.vm.network "forwarded_port", guest: 3306, host: 3306,
           auto_correct: true
       end
