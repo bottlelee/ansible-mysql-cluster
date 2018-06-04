@@ -43,3 +43,10 @@
     path: ~/.my.cnf
     state: absent
   changed_when: false
+
+- name: "Fetching /etc/mysql/mysql.conf.d/mysqld.cnf to local directory"
+  fetch:
+    src: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+    dest: "install_report/mysql/{{ inventory_hostname }}_mysqld.cnf"
+    fail_on_missing: false
+    flat: yes

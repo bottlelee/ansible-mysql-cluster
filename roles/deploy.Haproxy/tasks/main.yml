@@ -14,3 +14,10 @@
     dest: /etc/haproxy/haproxy.cfg
     validate: "/usr/sbin/haproxy -c -f %s"
   notify: Reload haproxy
+
+- name: "Fetching /etc/haproxy/haproxy.cfg to local directory"
+  fetch:
+    src: "/etc/haproxy/haproxy.cfg"
+    dest: "install_report/haproxy/{{ inventory_hostname }}_haproxy.cfg"
+    fail_on_missing: false
+    flat: yes
