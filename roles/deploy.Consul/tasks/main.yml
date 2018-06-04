@@ -1,0 +1,15 @@
+- block:
+    - name: Checking consul's version
+      shell: /usr/local/bin/consul version | head -n1 | awk '{ gsub("v","") ; print $2 }'
+      register: verChk
+      changed_when: false
+      failed_when: verChk.stdout is version(consul_version, operator='lt')
+    - name: Checking consul port
+      wait_for:
+        host: 0.0.0.0
+        port: 8600
+        timeout: 3
+  rescue:
+    - include_tasks: install.yml
+
+- include_tasks: config.yml

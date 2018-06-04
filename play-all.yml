@@ -1,4 +1,5 @@
-- import_playbook: 01-env_init.yml
+- import_playbook: 00-env_init.yml
+- import_playbook: deploy_consul.yml
 - import_playbook: deploy_mysql_servers.yml
 # - import_playbook: 03-deploy_redis.yml
 # - import_playbook: 04-deploy_elasticsearch.yml

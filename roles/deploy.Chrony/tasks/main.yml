@@ -1,10 +1,31 @@
 - block:
-    - name: Checking chronyd command
-      command: "test -e /usr/sbin/chronyd"
-      changed_when: false
+    - name: Checking chronyd status
+      service:
+        name: chronyd
+        state: started
   rescue:
-    - include_tasks: install.yml
+    - name: Installing chrony
+      package:
+        name: chrony
 
-- include_tasks: config.yml
+- name: Update chrony.conf
+  template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+  notify: Restart chronyd service
 
-- include_tasks: report.yml
+- block:
+    - name: "Download /etc/chrony.conf to local directory"
+      fetch:
+        src: "/etc/chrony.conf"
+        dest: "install_report/chrony/{{ inventory_hostname }}_chrony.conf"
+        fail_on_missing: false
+        flat: yes
+  rescue:
+    - name: "Create local directory install_report/chrony.conf"
+      file:
+        path: "install_report/chrony"
+        state: directory
+      delegate_to: localhost
+      become: no
+    - include_tasks: report.yml

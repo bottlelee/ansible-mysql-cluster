@@ -1,7 +1,5 @@
 - name: Update MySQL root password for all root accounts
   mysql_user:
-    login_user: root
-    login_password: "{{ mysql_root_pass }}"
     check_implicit_admin: yes
     name: root
     host: "{{ item }}"
@@ -23,4 +21,9 @@
       Remove: "y"
       Disallow: "y"
       Reload: "y"
-    changed_when: false
+  changed_when: false
+
+- name: Update server ID
+  mysql_variables:
+    variable: server_id
+    value: "{{ bind_address.split('.')[-2] + bind_address.split('.')[-1] }}"

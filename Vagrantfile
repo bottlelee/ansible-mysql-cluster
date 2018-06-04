@@ -7,7 +7,7 @@ Vagrant.require_version ">= 2.0.0"
 
 $vm_box = "ubuntu/xenial64"
 # $vm_box = "centos/7"
-$instances = 5
+$instances = 3
 $apt_proxy = "http://192.168.205.12:3142"
 
 Vagrant.configure("2") do |config|
@@ -33,8 +33,10 @@ Vagrant.configure("2") do |config|
   end
 
   (1..$instances).each do |instance_id|
-    if instance_id <= 3
-      $vm_name = "mysql-server-#{instance_id.to_s.rjust(2, '0')}"
+    if instance_id <= 2
+      $vm_name = "mysql-master-#{instance_id.to_s.rjust(2, '0')}"
+    elsif instance_id == 3
+      $vm_name = "mysql-slave-#{instance_id.to_s.rjust(2, '0')}"
     elsif instance_id == 4
       $vm_name = "mysql-router-#{instance_id.to_s.rjust(2, '0')}"
     elsif instance_id == 5
@@ -61,9 +63,11 @@ Vagrant.configure("2") do |config|
       if instance_id == $instances
         config.vm.provision "ansible" do |ansible|
           ansible.groups = {
-            "servers" => ["mysql-server-[01:03]"],
-            "routers" => ["mysql-router-04"],
-            "shells" => ["mysql-shell-05"]
+            "masters" => ["mysql-master-[01:02]"],
+            "slaves" => ["mysql-slave-03"],
+            "mysqls:children" => ["slaves", "masters"]
+            # "routers" => ["mysql-router-04"],
+            # "shells" => ["mysql-shell-05"]
           }
           ansible.limit = "all"
           ansible.playbook = "play-all.yml"

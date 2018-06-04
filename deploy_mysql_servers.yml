@@ -1,8 +1,16 @@
-- hosts: servers
+- hosts: masters:slaves
   become: yes
-  serial: 33%
+  serial: 2
   vars_files:
     - vars/download_urls.yml
     - vars/mysql_settings.yml
   roles:
     - deploy.MysqlServer
+
+- hosts: mysqls
+  become: yes
+  tasks:
+    - name: make sure ~/.my.cnf is deleted
+      file:
+        path: ~/.my.cnf
+        state: absent

@@ -1,0 +1,25 @@
+- block:
+    - name: Uploading command file
+      copy:
+        src: "downloaded_files/consul-{{ consul_version }}"
+        dest: /usr/local/bin/consul
+        mode: 0755
+  rescue:
+    - include_tasks: download.yml
+    - include_tasks: install.yml
+  always:
+    - name: Creating user 'consul'
+      user:
+        name: consul
+    - name: Creating /etc/consul.d
+      file:
+        path: /etc/consul.d/
+        state: directory
+        owner: consul
+        group: consul
+    - name: Creating /var/consul
+      file:
+        path: /var/consul
+        state: directory
+        owner: consul
+        group: consul
