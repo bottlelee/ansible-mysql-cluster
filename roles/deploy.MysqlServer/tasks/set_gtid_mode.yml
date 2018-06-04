@@ -1,0 +1,37 @@
+- name: Get GTID mode status
+  mysql_variables:
+    variable: gtid_mode
+  register: gtidMode
+
+- name: Turn on GTID mode when it is "OFF"
+  mysql_variables:
+    variable: "{{ item.k }}"
+    value: "{{ item.v }}"
+  with_items:
+    - k: gtid_mode
+      v: "OFF_PERMISSIVE"
+    - k: gtid_mode
+      v: "ON_PERMISSIVE"
+    - k: gtid_mode
+      v: "ON"
+  when: gtidMode.msg == 'OFF'
+
+- name: Turn on GTID mode when it is "OFF_PERMISSIVE"
+  mysql_variables:
+    variable: "{{ item.k }}"
+    value: "{{ item.v }}"
+  with_items:
+    - k: gtid_mode
+      v: "ON_PERMISSIVE"
+    - k: gtid_mode
+      v: "ON"
+  when: gtidMode.msg == 'OFF_PERMISSIVE'
+
+- name: Turn on GTID mode when it is "ON_PERMISSIVE"
+  mysql_variables:
+    variable: gtid_mode
+    value: "ON"
+  when: gtidMode.msg == 'ON_PERMISSIVE'
+
+- debug:
+    var: gtidMode

@@ -1,0 +1,31 @@
+- block:
+    - name: Checking python2
+      raw: test -e /usr/bin/python
+      changed_when: false
+    - name: Create/update host_vars files
+      lineinfile:
+        path: "host_vars/{{ inventory_hostname }}.yml"
+        regexp: "^ansible_python_interpreter"
+        line: "ansible_python_interpreter: /usr/bin/python"
+        create: yes
+      delegate_to: localhost
+      become: no
+  rescue:
+    - name: Checking python3
+      raw: test -e /usr/bin/python3
+      changed_when: false
+    - set_fact:
+        ansible_python_interpreter: /usr/bin/python3
+    - name: Installing python2
+      apt:
+        name: python-minimal
+
+- block:
+    - meta: clear_host_errors
+    - meta: refresh_inventory
+    - set_fact:
+        ansible_python_interpreter: /usr/bin/python
+    - setup:
+    - include_tasks: create_hostvars.yml
+  rescue:
+    - include_tasks: check_python.yml

@@ -1,0 +1,30 @@
+- name: Installing fio
+  package:
+    name: fio
+
+- name: Uploading fio file
+  copy:
+    src: random_write.fio
+    dest: /tmp/random_write.fio
+
+- name: Run fio test
+  shell: "/usr/bin/fio /tmp/random_write.fio | grep iops | awk '{ print $4 }' | sed 's/iops=//' | sed 's/,//'"
+  register: fio
+
+- debug:
+    var: fio.stdout
+
+- name: Set innodb_io_capacity and innodb_io_capacity_max
+  ini_file:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    section: mysqld
+    option: "{{ item.k }}"
+    value: "{{ item.v }}"
+    state: present
+    backup: yes
+  with_items:
+    - k: innodb_io_capacity_max
+      v: "{{ fio.stdout | int }}"
+    - k: innodb_io_capacity
+      v: "{{ (fio.stdout|int * 0.6) | int }}"
+  notify: Restart mysql

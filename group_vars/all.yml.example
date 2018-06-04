@@ -1,0 +1,38 @@
+timezone: 'Asia/Shanghai'
+
+# Set 'true' when deploy on production.
+check_groups: true
+
+# Set the network interface name to get IP
+## CentOS
+RedHat_bind_interface: 'eth1'
+## Ubuntu
+Debian_bind_interface: 'enp0s8'
+
+# DNS nameserver
+dns_servers:
+  - 127.0.0.1
+  - 1.1.1.1
+
+# Consul
+consul_version: '1.1.0'
+consul_dc_name: 'mysql'
+
+# Monit
+monit_version: '5.25.1'
+smtp_host: ''
+smtp_user: ''
+smtp_pass: ''
+recipients:
+  - {
+    name: '李海滨',
+    email: 'haibin.lee@foxmail.com'
+  }
+
+# global beats' modules list
+global_filebeat_modules:
+  - system
+  - auditd
+global_metricbeat_modules:
+  - system
+global_packetbeat_modules: ""

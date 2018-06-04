@@ -1,0 +1,6 @@
+- fail:
+    msg: "At least 3 hosts needed in group '{{ item }}'"
+  when: (groups[item] | length) < 3
+  with_items:
+    - managers
+    - nodes

@@ -1,0 +1,45 @@
+# Keep this task as the first task
+- name: Uploading my.cnf
+  template:
+    src: mysql_auth.cnf.j2
+    dest: ~/.my.cnf
+    mode: 400
+  changed_when: false
+
+- block:
+    - name: Checking mysql status
+      service:
+        name: mysql
+        state: started
+    - name: Checking mysql port
+      wait_for:
+        port: 3306
+        timeout: 120
+  rescue:
+    - include_tasks: "{{ ansible_os_family }}.yml"
+    - include_tasks: init_config.yml
+
+- name: Updating /etc/mysql/mysql.conf.d/mysqld.cnf
+  template:
+    src: mysqld.cnf.j2
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+    backup: yes
+  notify: Restart mysql
+
+- block:
+    - name: Get slave status
+      mysql_replication:
+        mode: getslave
+      register: slaveStatus
+      failed_when: "(slaveStatus.Slave_IO_Running|bool == false) or (slaveStatus.Slave_SQL_Running|bool == false)"
+  rescue:
+    - meta: flush_handlers
+    - include_tasks: set_gtid_mode.yml
+    - include_tasks: replication.yml
+
+# Keep this task as the last task
+- name: Deleting ~/.my.cnf
+  file:
+    path: ~/.my.cnf
+    state: absent
+  changed_when: false

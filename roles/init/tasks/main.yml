@@ -1,0 +1,19 @@
+- include_tasks: check_groups.yml
+  when: check_groups is defined and check_groups == "true"
+  run_once: yes
+
+- include_tasks: create_hostvars.yml
+
+- include_tasks: system.yml
+
+- include_tasks: hostname.yml
+
+# - block:
+#     - name: Checking java command
+#       command: /usr/bin/java -version
+#       changed_when: false
+#   rescue:
+#     - include_tasks: jre.yml
+#   when: "'redis' not in group_names"
+
+- include_tasks: "{{ ansible_os_family }}.yml"

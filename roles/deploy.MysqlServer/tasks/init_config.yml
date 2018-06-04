@@ -1,0 +1,29 @@
+- name: Update MySQL root password for all root accounts
+  mysql_user:
+    check_implicit_admin: yes
+    name: root
+    host: "{{ item }}"
+    password: "{{ mysql_root_pass }}"
+    state: present
+  with_items:
+    - ::1
+    - localhost
+    - 127.0.0.1
+
+- name: Running mysql_secure_installation
+  expect:
+    command: /usr/bin/mysql_secure_installation
+    responses:
+      Enter: "{{ mysql_root_pass }}"
+      Press: "y"
+      MEDIUM: "1"
+      Change: "n"
+      Remove: "y"
+      Disallow: "y"
+      Reload: "y"
+  changed_when: false
+
+- name: Update server ID
+  mysql_variables:
+    variable: server_id
+    value: "{{ bind_address.split('.')[-2] + bind_address.split('.')[-1] }}"

@@ -1,0 +1,11 @@
+[random-write]
+rw=randwrite
+iodepth=32
+size=56m
+directory=/tmp/
+ioengine=libaio
+direct=1
+group_reporting
+name=random-write-direct
+bs=8k
+runtime=1000
