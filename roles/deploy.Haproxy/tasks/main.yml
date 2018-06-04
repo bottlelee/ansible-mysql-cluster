@@ -1,0 +1,16 @@
+- block:
+    - name: Checking haproxy status
+      service:
+        name: haproxy
+        state: started
+  rescue:
+    - name: Installing haproxy
+      package:
+        name: haproxy
+
+- name: Updating /etc/haproxy/haproxy.cfg
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    validate: "/usr/sbin/haproxy -c -f %s"
+  notify: Reload haproxy

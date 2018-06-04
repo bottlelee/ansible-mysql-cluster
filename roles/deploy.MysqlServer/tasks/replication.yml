@@ -1,31 +1,34 @@
-# - name: Restarting mysql service
-#   service:
-#     name: mysql
-#     state: restarted
-#
-# - name: Waiting for mysql started
-#   wait_for:
-#     port: "{{ mysql_port }}"
-
 - name: Creating user 'repl' for replication
   mysql_user:
     name: "{{ mysql_repl_user }}"
     password: "{{ mysql_repl_pass }}"
     host: '%'
     priv: '*.*:REPLICATION SLAVE'
+    sql_log_bin: no
 
 - name: Stop slave
   mysql_replication:
     mode: stopslave
 
-- name: "Change master to {{ groups['masters'] | select('ne', ansible_hostname) | first  }}"
+- name: "Change master to {{ groups['masters'] | select('ne', ansible_hostname) | first  }} | 'masters' group"
   mysql_replication:
-    master_host: "{{ (groups['masters'] | select('ne', inventory_hostname) | first) }}.node.{{ consul_dc_name }}.consul"
+    master_host: "{{ (groups['masters'] | select('ne', inventory_hostname) | first) }}"
     master_port: "{{ mysql_port }}"
     master_user: "{{ mysql_repl_user }}"
     master_password: "{{ mysql_repl_pass }}"
     master_auto_position: true
     mode: changemaster
+  when: "'masters' in group_names"
+
+- name: "Change master to localhost:{{ haproxy_mysql_port }} with HAPROXY | 'slaves' group"
+  mysql_replication:
+    master_host: "localhost"
+    master_port: "{{ haproxy_mysql_port }}"
+    master_user: "{{ mysql_repl_user }}"
+    master_password: "{{ mysql_repl_pass }}"
+    master_auto_position: true
+    mode: changemaster
+  when: "'slaves' in group_names"
 
 - name: Start slave
   mysql_replication:

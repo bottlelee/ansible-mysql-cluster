@@ -3,9 +3,6 @@
     variable: gtid_mode
   register: gtidMode
 
-- debug:
-    var: gtidMode
-
 - name: Turn on GTID mode when it is "OFF"
   mysql_variables:
     variable: "{{ item.k }}"

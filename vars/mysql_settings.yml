@@ -7,6 +7,7 @@ mysql_repl_pass: Xx2k8EHU#
 
 mysql_data_dir: /var/lib/mysql
 mysql_port: 3306
+haproxy_mysql_port: 23306
 
 # Adjust the buffer pool value here, 50%-70% of total RAM.
 # This will set the 'innodb_buffer_pool_size' in mysqld.cnf.

@@ -1,6 +1,6 @@
-- name: Restart chronyd service
+- name: Restart chrony service
   service:
-    name: chronyd
+    name: chrony
     state: restarted
     daemon_reload: yes
     enabled: yes

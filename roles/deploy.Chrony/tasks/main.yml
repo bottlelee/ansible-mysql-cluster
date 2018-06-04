@@ -1,7 +1,7 @@
 - block:
-    - name: Checking chronyd status
+    - name: Checking chrony status
       service:
-        name: chronyd
+        name: chrony
         state: started
   rescue:
     - name: Installing chrony
@@ -12,7 +12,7 @@
   template:
     src: chrony.conf.j2
     dest: /etc/chrony.conf
-  notify: Restart chronyd service
+  notify: Restart chrony service
 
 - block:
     - name: "Download /etc/chrony.conf to local directory"

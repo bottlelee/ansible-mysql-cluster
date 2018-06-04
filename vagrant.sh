@@ -1,19 +1,15 @@
 #!/usr/bin/env bash
 
 function create() {
-  rm host_vars .fact_caching -rf
-  vagrant up --no-provision
-  vagrant snapshot save init
-  vagrant reload --provision
+  rm host_vars -rf
+  vagrant up --provision
+  # vagrant snapshot save init
+  # vagrant reload --provision
 }
 
 case $1 in
   up )
     create
-    ;;
-  restore )
-    rm host_vars .fact_caching -rf
-    vagrant snapshot restore init
     ;;
   rebuild )
     vagrant destroy -f
@@ -23,5 +19,5 @@ case $1 in
     vagrant destroy -f
     ;;
   * )
-    echo "Usage: up|restore|rebuild|down"
+    echo "Usage: up|rebuild|down"
 esac

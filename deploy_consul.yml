@@ -1,5 +1,0 @@
-- hosts: all
-  become: yes
-  serial: 33%
-  roles:
-    - deploy.Consul

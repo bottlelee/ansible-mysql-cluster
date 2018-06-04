@@ -2,6 +2,8 @@
   when: check_groups is defined and check_groups == "true"
   run_once: yes
 
+- include_tasks: create_hostvars.yml
+
 - include_tasks: system.yml
 
 - include_tasks: hostname.yml
