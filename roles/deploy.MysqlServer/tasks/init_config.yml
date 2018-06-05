@@ -1,3 +1,56 @@
+- block:
+    - name: Get the temporary root password
+      shell: grep 'temporary password' /var/log/mysqld.log | awk '{ print $NF }'
+      register: tempPassword
+      failed_when: "tempPassword.stdout == ''"
+    - name: Set the temporary root password
+      ini_file:
+        path: ~/.my.cnf
+        section: client
+        option: password
+        value: "{{ tempPassword.stdout | quote }}"
+    - name: Trying mysql_secure_installation
+      expect:
+        command: /usr/bin/mysql_secure_installation
+        responses:
+          Enter: "{{ mysql_root_temp_pass | default(mysql_root_pass) }}"
+          New: "{{ mysql_root_pass }}"
+          Re-enter: "{{ mysql_root_pass }}"
+          Press: "y"
+          MEDIUM: "1"
+          Change: "n"
+          Remove: "y"
+          Disallow: "y"
+          Reload: "y"
+      changed_when: false
+    - name: Update the root password in ~/.my.cnf
+      ini_file:
+        path: ~/.my.cnf
+        section: client
+        option: password
+        value: "{{ mysql_root_pass | quote }}"
+  rescue:
+    - name: Update the root password in ~/.my.cnf
+      ini_file:
+        path: ~/.my.cnf
+        section: client
+        option: password
+        value: "{{ mysql_root_pass | quote }}"
+    - name: Try again mysql_secure_installation
+      expect:
+        command: /usr/bin/mysql_secure_installation
+        responses:
+          Enter: "{{ mysql_root_pass }}"
+          New: "{{ mysql_root_pass }}"
+          Re-enter: "{{ mysql_root_pass }}"
+          Press: "y"
+          MEDIUM: "1"
+          Change: "n"
+          Remove: "y"
+          Disallow: "y"
+          Reload: "y"
+      changed_when: false
+
 - name: Update MySQL root password for all root accounts
   mysql_user:
     check_implicit_admin: yes
@@ -9,19 +62,6 @@
     - ::1
     - localhost
     - 127.0.0.1
-
-- name: Running mysql_secure_installation
-  expect:
-    command: /usr/bin/mysql_secure_installation
-    responses:
-      Enter: "{{ mysql_root_pass }}"
-      Press: "y"
-      MEDIUM: "1"
-      Change: "n"
-      Remove: "y"
-      Disallow: "y"
-      Reload: "y"
-  changed_when: false
 
 - name: Update server ID
   mysql_variables:

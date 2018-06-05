@@ -11,7 +11,7 @@ Debian_bind_interface: 'enp0s8'
 
 # DNS nameserver
 dns_servers:
-  - 127.0.0.1
+  - 8.8.8.8
   - 1.1.1.1
 
 # Consul

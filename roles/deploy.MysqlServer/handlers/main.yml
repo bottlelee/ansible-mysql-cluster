@@ -1,8 +1,9 @@
-- name: Restarting mysql service
+- name: Restarting mysqld service
   service:
-    name: mysql
+    name: mysqld
     state: restarted
     enabled: yes
+    daemon_reload: yes
   listen: Restart mysql
 
 - name: Waiting for mysql started

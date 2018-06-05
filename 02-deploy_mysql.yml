@@ -1,16 +1,33 @@
 - hosts: masters:slaves
   become: yes
-  serial: 2
+  serial: 33%
   vars_files:
-    - vars/download_urls.yml
     - vars/mysql_settings.yml
   roles:
     - deploy.MysqlServer
 
-- hosts: mysqls
+- hosts: masters:slaves
   become: yes
+  vars_files:
+    - vars/mysql_settings.yml
   tasks:
     - name: make sure ~/.my.cnf is deleted
       file:
         path: ~/.my.cnf
         state: absent
+    - name: "Fetching /etc/mysql/mysql.conf.d/mysqld.cnf to local directory"
+      fetch:
+        src: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+        dest: "install_report/mysql/{{ inventory_hostname }}_mysqld.cnf"
+        fail_on_missing: false
+        flat: yes
+    - name: Checking replication status
+      mysql_replication:
+        login_user: root
+        login_password: "{{ mysql_root_pass }}"
+        login_port: "{{ mysql_port }}"
+        mode: getslave
+      register: slaveStatus
+      until: "(slaveStatus.Slave_IO_Running|bool == true) and (slaveStatus.Slave_SQL_Running|bool == true)"
+      retries: 10
+      delay: 10

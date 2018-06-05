@@ -1,7 +1,7 @@
 - name: Reload haproxy service
   service:
     name: haproxy
-    state: reloaded
+    state: restarted
     enabled: yes
     daemon_reload: yes
   listen: Reload haproxy
@@ -9,6 +9,9 @@
 - name: Wating for ports connected
   wait_for:
     host: "0.0.0.0"
-    port: "{{ haproxy_mysql_port }}"
+    port: "{{ item }}"
     timeout: 30
+  with_items:
+    - "{{ haproxy_mysql_rw_port }}"
+    - "{{ haproxy_mysql_ro_port }}"
   listen: Reload haproxy

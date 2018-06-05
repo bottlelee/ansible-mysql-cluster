@@ -9,22 +9,31 @@
 - block:
     - name: Checking mysql status
       service:
-        name: mysql
+        name: mysqld
         state: started
     - name: Checking mysql port
       wait_for:
-        port: 3306
+        port: "{{ mysql_port }}"
         timeout: 120
   rescue:
     - include_tasks: "{{ ansible_os_family }}.yml"
     - include_tasks: init_config.yml
 
-- name: Updating /etc/mysql/mysql.conf.d/mysqld.cnf
+- name: Updating /etc/mysql/mysql.conf.d/mysqld.cnf | Debian
   template:
     src: mysqld.cnf.j2
     dest: /etc/mysql/mysql.conf.d/mysqld.cnf
     backup: yes
   notify: Restart mysql
+  when: ansible_os_family == 'Debian'
+
+- name: Updating /etc/my.cnf | RedHat
+  template:
+    src: mysqld.cnf.j2
+    dest: /etc/my.cnf
+    backup: yes
+  notify: Restart mysql
+  when: ansible_os_family == 'RedHat'
 
 - block:
     - name: Get slave status
@@ -36,17 +45,3 @@
     - meta: flush_handlers
     - include_tasks: set_gtid_mode.yml
     - include_tasks: replication.yml
-
-# Keep this task as the last task
-- name: Deleting ~/.my.cnf
-  file:
-    path: ~/.my.cnf
-    state: absent
-  changed_when: false
-
-- name: "Fetching /etc/mysql/mysql.conf.d/mysqld.cnf to local directory"
-  fetch:
-    src: "/etc/mysql/mysql.conf.d/mysqld.cnf"
-    dest: "install_report/mysql/{{ inventory_hostname }}_mysqld.cnf"
-    fail_on_missing: false
-    flat: yes

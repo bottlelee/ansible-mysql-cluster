@@ -23,7 +23,7 @@
 - name: "Change master to localhost:{{ haproxy_mysql_port }} with HAPROXY | 'slaves' group"
   mysql_replication:
     master_host: "localhost"
-    master_port: "{{ haproxy_mysql_port }}"
+    master_port: "{{ haproxy_mysql_rw_port }}"
     master_user: "{{ mysql_repl_user }}"
     master_password: "{{ mysql_repl_pass }}"
     master_auto_position: true

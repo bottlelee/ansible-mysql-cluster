@@ -12,7 +12,7 @@
 
 - name: Installing mysql-apt-config
   apt:
-    deb: "{{ mysql_apt_config_url}}"
+    deb: "{{ mysql_apt_config_url }}"
   register: download
   until: download is succeeded
   retries: 99
@@ -35,7 +35,7 @@
     value: '{{ mysql_data_dir }}'
     vtype: 'note'
 
-- name: Installing mysql-server
+- name: Installing 'mysql-server' and 'mysql-client'
   apt:
     name: "{{ item }}"
     update_cache: yes
@@ -55,3 +55,15 @@
   with_items:
     - python-mysqldb
     - python-pexpect
+
+- name: Set service alias name to 'mysqld'
+  ini_file:
+    path: /etc/systemd/system/mysql.service.d/alias.conf
+    section: Install
+    option: Alias
+    value: mysqld.service
+  notify: Restart mysql
+
+- name: Reload systemd daemon
+  service:
+    daemon_reload: yes

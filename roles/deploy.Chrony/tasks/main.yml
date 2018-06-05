@@ -1,18 +1,26 @@
 - block:
     - name: Checking chrony status
       service:
-        name: chrony
+        name: chronyd
         state: started
   rescue:
     - name: Installing chrony
       package:
         name: chrony
+    - name: Set service alias name to 'chronyd'
+      ini_file:
+        path: /etc/systemd/system/chrony.service.d/alias.conf
+        section: Install
+        option: Alias
+        value: chronyd.service
+      when: ansible_os_family == 'Debian'
+      notify: Restart chronyd service
 
 - name: Update chrony.conf
   template:
     src: chrony.conf.j2
     dest: /etc/chrony.conf
-  notify: Restart chrony service
+  notify: Restart chronyd service
 
 - name: "Fetching /etc/chrony.conf to local directory"
   fetch:
