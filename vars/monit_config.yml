@@ -1,0 +1,9 @@
+# Monit
+smtp_host: ''
+smtp_user: ''
+smtp_pass: ''
+recipients:
+  - {
+    name: '李海滨',
+    email: 'haibin.lee@foxmail.com'
+  }

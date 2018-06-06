@@ -2,14 +2,14 @@
   become: yes
   serial: 33%
   vars_files:
-    - vars/mysql_settings.yml
+    - vars/mysql_config.yml
   roles:
     - deploy.MysqlServer
 
 - hosts: masters:slaves
   become: yes
   vars_files:
-    - vars/mysql_settings.yml
+    - vars/mysql_config.yml
   tasks:
     - include_role:
         name: deploy.MysqlServer

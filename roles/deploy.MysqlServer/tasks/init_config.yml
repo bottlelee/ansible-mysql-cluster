@@ -1,9 +1,12 @@
 - block:
 
     - name: Get the temporary root password
-      shell: grep 'temporary password' /var/log/mysqld.log | awk '{ print $NF }'
+      shell: grep 'temporary password' /var/log/mysql/error.log || grep 'temporary password' /var/log/mysqld.log | awk '{ print $NF }'
       register: tempPassword
       failed_when: "tempPassword.stdout == ''"
+
+    - debug:
+        msg: "{{ tempPassword.stdout }}"
 
     - name: Set the temporary root password
       ini_file:
@@ -59,7 +62,7 @@
       changed_when: false
 
   always:
-  
+
     - name: Update MySQL root password for all root accounts
       mysql_user:
         check_implicit_admin: yes

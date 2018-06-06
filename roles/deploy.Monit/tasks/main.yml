@@ -1,0 +1,17 @@
+- block:
+
+    - name: Checking monit status
+      service:
+        name: monit
+        state: started
+
+  rescue:
+
+    - name: Installing monit
+      package:
+        name: monit
+      notify: Enable monit service
+
+  always:
+
+    - include_tasks: config_all.yml

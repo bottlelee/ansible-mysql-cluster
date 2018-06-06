@@ -5,7 +5,7 @@
         login_port: "{{ mysql_port }}"
         mode: getslave
       register: slaveStatus
-      failed_when: "(slaveStatus.Slave_IO_Running|bool == false) or (slaveStatus.Slave_SQL_Running|bool == false)"
+      failed_when: "(slaveStatus.Slave_SQL_Running|bool != true) or (slaveStatus.Slave_IO_Running|bool != true)"
   rescue:
     - pause:
         seconds: 30

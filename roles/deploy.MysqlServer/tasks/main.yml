@@ -11,22 +11,12 @@
 - include_tasks: set_gtid_mode.yml
   when: "'masters' in group_names"
 
-# - block:
-#     - name: Get slave IO running status
-#       mysql_replication:
-#         mode: getslave
-#       register: slaveIoStatus
-#       failed_when: "slaveIoStatus.Slave_IO_Running|bool == false"
-#   rescue:
-#     - include_tasks: set_gtid_mode.yml
-#       delegate_to: slaveIoStatus.Master_Host
-
 - block:
-    - name: Get slave SQL running status
+    - name: Get slave running status
       mysql_replication:
         mode: getslave
-      register: slaveSqlStatus
-      failed_when: "slaveSqlStatus.Slave_SQL_Running|bool == false"
+      register: slaveStatus
+      failed_when: "(slaveStatus.Slave_SQL_Running|bool != true) or (slaveStatus.Slave_IO_Running|bool != true)"
   rescue:
     - meta: flush_handlers
     - include_tasks: replication.yml

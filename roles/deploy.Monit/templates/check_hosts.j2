@@ -1,0 +1,4 @@
+{% for item in groups['all'] if item != inventory_hostname %}
+check host {{ item | upper }} with address {{ hostvars[item]['bind_address'] }}
+  if failed ping4 count 5 with timeout 10 seconds then alert
+{% endfor %}

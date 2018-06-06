@@ -1,0 +1,47 @@
+- name: Update monitrc
+  template:
+    src: monitrc.j2
+    dest: /etc/monitrc
+    mode: 0600
+    owner: root
+    group: root
+  notify: "Reload monit"
+
+- name: Install/update config for all
+  template:
+    src: '{{ item }}.j2'
+    dest: '/etc/monit.d/{{ item }}'
+    mode: 0600
+  with_items:
+    - check_fs_usage
+    - check_hosts
+    - check_services
+    - check_sysload
+  notify: "Reload monit"
+  register: monitFiles
+
+- name: Listing current config files
+  command: "ls /etc/monit.d/"
+  ignore_errors: yes
+  changed_when: false
+  register: allMonitFiles
+
+- name: Removing unmanaged config files
+  file:
+    path: "/etc/monit.d/{{ item }}"
+    state: absent
+  with_items: "{{ allMonitFiles.stdout_lines }}"
+  when: "item not in (monitFiles.results|selectattr('item', 'string')|map(attribute='item')|list)"
+  notify: "Reload monit"
+
+- name: "Updating /root/.mysql_repl_auth.cnf"
+  template:
+    src: mysql_repl_auth.cnf.j2
+    dest: "/root/.mysql_repl_auth.cnf"
+    mode: 0440
+
+- name: "Updating /usr/local/bin/check_mysql_repl.sh"
+  template:
+    src: check_mysql_repl.sh.j2
+    dest: /usr/local/bin/check_mysql_repl.sh
+    mode: 0750
