@@ -2,5 +2,10 @@
   service:
     name: chronyd
     state: restarted
-    daemon_reload: yes
+    enabled: yes
+
+- name: Restart chrony service
+  service:
+    name: chrony
+    state: restarted
     enabled: yes

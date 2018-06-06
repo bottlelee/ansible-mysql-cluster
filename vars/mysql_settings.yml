@@ -17,7 +17,6 @@ innodb_buffer_pool_size_percent: 0.7
 
 # http://dev.mysql.com/downloads/repo/apt/
 mysql_apt_config_url: https://dev.mysql.com/get/mysql-apt-config_0.8.10-1_all.deb
-mysql_yum_config_url: https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm
 
 # Those below config will add or replace in mysqld.conf, section [mysqld]
 # Set the 'v' value equal to 'false' if you want to remove the settings.
@@ -34,4 +33,3 @@ mysql_mysqld_config:
   - {k: enforce-gtid-consistency, v: 1}
   - {k: log_slave_updates, v: 1}
   - {k: log_bin, v: /var/log/mysql/mysql-bin.log}
-  - {k: skip_name_resolve }

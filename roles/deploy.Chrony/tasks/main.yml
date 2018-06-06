@@ -1,30 +1,45 @@
 - block:
-    - name: Checking chrony status
+    - name: Checking chronyd status | RedHat
       service:
         name: chronyd
         state: started
   rescue:
-    - name: Installing chrony
-      package:
+    - name: Installing chrony | RedHat
+      yum:
         name: chrony
-    - name: Set service alias name to 'chronyd'
-      ini_file:
-        path: /etc/systemd/system/chrony.service.d/alias.conf
-        section: Install
-        option: Alias
-        value: chronyd.service
-      when: ansible_os_family == 'Debian'
+  always:
+    - name: Update chrony.conf | RedHat
+      template:
+        src: chrony.conf.j2
+        dest: /etc/chrony.conf
       notify: Restart chronyd service
+    - name: "Fetching /etc/chrony.conf to local directory"
+      fetch:
+        src: "/etc/chrony.conf"
+        dest: "install_report/chrony/{{ inventory_hostname }}_chrony.conf"
+        fail_on_missing: false
+        flat: yes
+  when: ansible_os_family == 'RedHat'
 
-- name: Update chrony.conf
-  template:
-    src: chrony.conf.j2
-    dest: /etc/chrony.conf
-  notify: Restart chronyd service
-
-- name: "Fetching /etc/chrony.conf to local directory"
-  fetch:
-    src: "/etc/chrony.conf"
-    dest: "install_report/chrony/{{ inventory_hostname }}_chrony.conf"
-    fail_on_missing: false
-    flat: yes
+- block:
+    - name: Checking chrony status | Debian
+      service:
+        name: chrony
+        state: started
+  rescue:
+    - name: Installing chrony | Debian
+      apt:
+        name: chrony
+  always:
+    - name: Update chrony.conf | Debian
+      template:
+        src: chrony.conf.j2
+        dest: /etc/chrony/chrony.conf
+      notify: Restart chrony service
+    - name: "Fetching /etc/chrony/chrony.conf to local directory"
+      fetch:
+        src: "/etc/chrony/chrony.conf"
+        dest: "install_report/chrony/{{ inventory_hostname }}_chrony.conf"
+        fail_on_missing: false
+        flat: yes
+  when: ansible_os_family == 'Debian'

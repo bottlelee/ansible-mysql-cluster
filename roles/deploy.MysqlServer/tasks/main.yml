@@ -6,42 +6,27 @@
     mode: 400
   changed_when: false
 
-- block:
-    - name: Checking mysql status
-      service:
-        name: mysqld
-        state: started
-    - name: Checking mysql port
-      wait_for:
-        port: "{{ mysql_port }}"
-        timeout: 120
-  rescue:
-    - include_tasks: "{{ ansible_os_family }}.yml"
-    - include_tasks: init_config.yml
+- include_tasks: "{{ ansible_os_family }}.yml"
 
-- name: Updating /etc/mysql/mysql.conf.d/mysqld.cnf | Debian
-  template:
-    src: mysqld.cnf.j2
-    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
-    backup: yes
-  notify: Restart mysql
-  when: ansible_os_family == 'Debian'
+- include_tasks: set_gtid_mode.yml
+  when: "'masters' in group_names"
 
-- name: Updating /etc/my.cnf | RedHat
-  template:
-    src: mysqld.cnf.j2
-    dest: /etc/my.cnf
-    backup: yes
-  notify: Restart mysql
-  when: ansible_os_family == 'RedHat'
+# - block:
+#     - name: Get slave IO running status
+#       mysql_replication:
+#         mode: getslave
+#       register: slaveIoStatus
+#       failed_when: "slaveIoStatus.Slave_IO_Running|bool == false"
+#   rescue:
+#     - include_tasks: set_gtid_mode.yml
+#       delegate_to: slaveIoStatus.Master_Host
 
 - block:
-    - name: Get slave status
+    - name: Get slave SQL running status
       mysql_replication:
         mode: getslave
-      register: slaveStatus
-      failed_when: "(slaveStatus.Slave_IO_Running|bool == false) or (slaveStatus.Slave_SQL_Running|bool == false)"
+      register: slaveSqlStatus
+      failed_when: "slaveSqlStatus.Slave_SQL_Running|bool == false"
   rescue:
     - meta: flush_handlers
-    - include_tasks: set_gtid_mode.yml
     - include_tasks: replication.yml

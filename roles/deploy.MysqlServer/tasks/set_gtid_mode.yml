@@ -3,6 +3,9 @@
     variable: gtid_mode
   register: gtidMode
 
+- meta: flush_handlers
+  when: gtidMode.msg != "ON"
+
 - name: Turn on GTID mode when it is "OFF"
   mysql_variables:
     variable: "{{ item.k }}"
@@ -32,3 +35,8 @@
     variable: gtid_mode
     value: "ON"
   when: gtidMode.msg == 'ON_PERMISSIVE'
+
+# - pause:
+#     seconds: 120
+#     prompt: "Delay 120s to avoid slave status check fail"
+#   when: gtidMode.msg != "ON"

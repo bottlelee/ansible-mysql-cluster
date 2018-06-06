@@ -1,69 +1,77 @@
-- name: Set mysql-apt-config before installing
-  debconf:
-    name: 'mysql-apt-config'
-    question: 'mysql-apt-config/{{ item.q }}'
-    value: '{{ item.v }}'
-    vtype: 'select'
-  with_items:
-    - q: select-server
-      v: 'mysql-{{ mysql_version }}'
-    - q: select-tools
-      v: Enabled
+- block:
 
-- name: Installing mysql-apt-config
-  apt:
-    deb: "{{ mysql_apt_config_url }}"
-  register: download
-  until: download is succeeded
-  retries: 99
-  delay: 5
+    - name: Checking mysql status
+      service:
+        name: mysql
+        state: started
 
-- name: Set MySQL root password before installing
-  debconf:
-    name: 'mysql-community-server'
-    question: 'mysql-community-server/{{ item }}'
-    value: '{{ mysql_root_pass }}'
-    vtype: 'password'
-  with_items:
-    - root-pass
-    - re-root-pass
+  rescue:
 
-- name: Set MySQL data dir before installing
-  debconf:
-    name: 'mysql-community-server'
-    question: 'mysql-community-server/data-dir'
-    value: '{{ mysql_data_dir }}'
-    vtype: 'note'
+    - name: Set mysql-apt-config before installing
+      debconf:
+        name: 'mysql-apt-config'
+        question: 'mysql-apt-config/{{ item.q }}'
+        value: '{{ item.v }}'
+        vtype: 'select'
+      with_items:
+        - q: select-server
+          v: 'mysql-{{ mysql_version }}'
+        - q: select-tools
+          v: Enabled
 
-- name: Installing 'mysql-server' and 'mysql-client'
-  apt:
-    name: "{{ item }}"
-    update_cache: yes
-  with_items:
-    - mysql-server
-    - mysql-client
+    - name: Installing mysql-apt-config
+      apt:
+        deb: "{{ mysql_apt_config_url }}"
+      register: download
+      until: download is succeeded
+      retries: 99
+      delay: 5
 
-- name: Hold up the packages to prevent upgrade
-  command: "apt-mark hold {{ item }}"
-  with_items:
-    - mysql-server
-    - mysql-client
+    - name: Set MySQL root password before installing
+      debconf:
+        name: 'mysql-community-server'
+        question: 'mysql-community-server/{{ item }}'
+        value: '{{ mysql_root_pass }}'
+        vtype: 'password'
+      with_items:
+        - root-pass
+        - re-root-pass
 
-- name: Installing needed packages
-  apt:
-    name: "{{ item }}"
-  with_items:
-    - python-mysqldb
-    - python-pexpect
+    - name: Set MySQL data dir before installing
+      debconf:
+        name: 'mysql-community-server'
+        question: 'mysql-community-server/data-dir'
+        value: '{{ mysql_data_dir }}'
+        vtype: 'note'
 
-- name: Set service alias name to 'mysqld'
-  ini_file:
-    path: /etc/systemd/system/mysql.service.d/alias.conf
-    section: Install
-    option: Alias
-    value: mysqld.service
-  notify: Restart mysql
+    - name: Installing 'mysql-server' and 'mysql-client'
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+        - mysql-server
+        - mysql-client
 
-- name: Reload systemd daemon
-  service:
-    daemon_reload: yes
+    - name: Hold up the packages to prevent upgrade
+      command: "apt-mark hold {{ item }}"
+      with_items:
+        - mysql-server
+        - mysql-client
+
+    - name: Installing needed packages
+      apt:
+        name: "{{ item }}"
+      with_items:
+        - python-mysqldb
+        - python-pexpect
+
+    - include_tasks: init_config.yml
+
+  always:
+
+    - name: Updating /etc/mysql/mysql.conf.d/mysqld.cnf
+      template:
+        src: mysqld.cnf.j2
+        dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+        backup: yes
+      notify: Restart mysql
