@@ -6,7 +6,7 @@
     daemon_reload: yes
 
 - name: Test monit config
-  command: /usr/bin/monit -t
+  command: /usr/local/bin/monit -t
   listen: "Reload monit"
 
 - name: Reload monit service

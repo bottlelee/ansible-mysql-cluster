@@ -1,4 +1,5 @@
 # Monit
+monit_version: '5.25.2'
 smtp_host: ''
 smtp_user: ''
 smtp_pass: ''

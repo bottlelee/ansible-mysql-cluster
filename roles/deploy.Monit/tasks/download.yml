@@ -1,0 +1,20 @@
+- block:
+    - stat:
+        path: "downloaded_files/monit-{{ monit_version }}-linux-x64.tar.gz"
+      register: p
+      failed_when: p.stat.exists == false
+      delegate_to: localhost
+      become: no
+      run_once: true
+  rescue:
+    - name: Downloading monit binary file
+      get_url:
+        url: "https://mmonit.com/monit/dist/binary/{{ monit_version }}/monit-{{ monit_version }}-linux-x64.tar.gz"
+        dest: downloaded_files
+      register: download
+      until: download is succeeded
+      retries: 99
+      delay: 10
+      delegate_to: localhost
+      become: no
+      run_once: true
