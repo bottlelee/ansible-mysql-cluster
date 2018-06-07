@@ -79,3 +79,14 @@
       mysql_variables:
         variable: server_id
         value: "{{ bind_address.split('.')[-2] + bind_address.split('.')[-1] }}"
+
+    - name: Set auto increment variables
+      mysql_variables:
+        variable: "{{ item.k }}"
+        value: "{{ item.v }}"
+      with_items:
+        - k: auto_increment_increment
+          v: "{{ mysql_auto_increment_increment }}"
+        - k: auto_increment_offset
+          v: "{{ mysql_auto_increment_offset }}"
+      when: "'masters' in group_names"

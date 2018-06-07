@@ -13,4 +13,4 @@ Fully tested on CentOS(7.x) and Ubuntu(xenial)
 
 ## Notes
 1. MySQL slaves replica from masters through haproxy service(on same host). Which means if master 1 failed, the slaves will automatic connect to master 2.
-1. If you want to promote a slave to master or demote a master to slave, just backup datas and change the definition in hosts.ini
+1. DO NOT change the host vars 'auto_increment_increment' and 'auto_increment_offset'
