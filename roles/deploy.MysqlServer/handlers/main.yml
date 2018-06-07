@@ -1,3 +1,10 @@
+- name: Restarting mysqld service
+  service:
+    name: mysqld
+    state: restarted
+    enabled: yes
+  listen: Restart mysqld
+
 - name: Restarting mysql service
   service:
     name: mysql
@@ -8,4 +15,7 @@
 - name: Waiting for mysql started
   wait_for:
     port: "{{ mysql_port }}"
-  listen: Restart mysql
+  listen: "{{ item }}"
+  with_items:
+    - Restart mysqld
+    - Restart mysql

@@ -7,6 +7,10 @@
     - name: Installing haproxy
       package:
         name: haproxy
+      register: install
+      until: install is succeeded
+      retries: 99
+      delay: 5
 
 - name: Updating /etc/haproxy/haproxy.cfg
   template:

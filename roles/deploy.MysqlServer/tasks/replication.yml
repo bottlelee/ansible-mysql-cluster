@@ -3,7 +3,7 @@
     name: "{{ mysql_repl_user }}"
     password: "{{ mysql_repl_pass }}"
     host: '%'
-    priv: '*.*:REPLICATION SLAVE'
+    priv: '*.*:REPLICATION SLAVE,REPLICATION CLIENT'
     sql_log_bin: no
 
 - name: Stop slave
@@ -20,10 +20,10 @@
     mode: changemaster
   when: "'masters' in group_names"
 
-- name: "Change master to localhost:{{ haproxy_mysql_port }} with HAPROXY | 'slaves' group"
+- name: "Change master to {{ bind_address }}:{{ haproxy_mysql_rw_port }} with HAPROXY | 'slaves' group"
   mysql_replication:
-    master_host: "localhost"
-    master_port: "{{ haproxy_mysql_port }}"
+    master_host: "{{ bind_address }}"
+    master_port: "{{ haproxy_mysql_rw_port }}"
     master_user: "{{ mysql_repl_user }}"
     master_password: "{{ mysql_repl_pass }}"
     master_auto_position: true

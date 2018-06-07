@@ -20,11 +20,14 @@
 # http://dev.mysql.com/doc/mysql/en/server-system-variables.html
 
 [mysqld]
-skip_name_resolve
 pid-file        = /var/run/mysqld/mysqld.pid
+{% if ansible_os_family == 'RedHat' %}
+socket          = /var/lib/mysql/mysql.sock
+{% else %}
 socket          = /var/run/mysqld/mysqld.sock
-datadir         = /var/lib/mysql
+{% endif %}
 log-error       = /var/log/mysql/error.log
+datadir         = {{ mysql_data_dir | default('/var/lib/mysql') }}
 server-id       = {{ bind_address.split('.')[-2] + bind_address.split('.')[-1] }}
 # By default we only accept connections from localhost
 bind-address    = 0.0.0.0

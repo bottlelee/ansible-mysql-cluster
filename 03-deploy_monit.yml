@@ -1,7 +1,8 @@
-- hosts: slaves
+- hosts: all
   become: yes
   serial: 33%
   vars_files:
+    - vars/monit_config.yml
     - vars/mysql_config.yml
   roles:
-    - deploy.Haproxy
+    - deploy.Monit

@@ -1,16 +1,21 @@
 - hosts: masters:slaves
   become: yes
-  serial: 2
+  serial: 33%
   vars_files:
-    - vars/download_urls.yml
-    - vars/mysql_settings.yml
+    - vars/mysql_config.yml
   roles:
     - deploy.MysqlServer
 
-- hosts: mysqls
+- hosts: masters:slaves
   become: yes
+  vars_files:
+    - vars/mysql_config.yml
   tasks:
+    - include_role:
+        name: deploy.MysqlServer
+        tasks_from: check_replication
     - name: make sure ~/.my.cnf is deleted
       file:
         path: ~/.my.cnf
         state: absent
+      changed_when: false

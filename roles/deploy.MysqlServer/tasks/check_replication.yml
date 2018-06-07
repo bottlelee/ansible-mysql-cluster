@@ -1,0 +1,13 @@
+- block:
+    - mysql_replication:
+        login_user: root
+        login_password: "{{ mysql_root_pass }}"
+        login_port: "{{ mysql_port }}"
+        mode: getslave
+      register: slaveStatus
+      failed_when: "(slaveStatus.Slave_SQL_Running|bool != true) or (slaveStatus.Slave_IO_Running|bool != true)"
+  rescue:
+    - pause:
+        seconds: 30
+    - include_tasks: set_gtid_mode.yml
+    - include_tasks: check_replication.yml

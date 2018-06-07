@@ -20,12 +20,14 @@ global
 
 defaults
   log       global
-  mode      http
-  option    httplog
+  retries   2
+  mode      tcp
+  option    tcplog
+  option    tcp-check
   option    dontlognull
-  timeout   connect 5000
-  timeout   client  50000
-  timeout   server  50000
+  timeout   connect 3000
+  timeout   client  5000
+  timeout   server  5000
 {% if ansible_os_family == 'Debian' %}
   errorfile 400 /etc/haproxy/errors/400.http
   errorfile 403 /etc/haproxy/errors/403.http
@@ -36,14 +38,20 @@ defaults
   errorfile 504 /etc/haproxy/errors/504.http
 {% endif %}
 
-listen mysql
-  bind    0.0.0.0:{{ haproxy_mysql_port }}
-  mode    tcp
-  option  tcplog
+listen mysql_rw
+  bind      0.0.0.0:{{ haproxy_mysql_rw_port }}
+  balance   source
 {% for item in groups['masters'] %}
 {% if loop.first %}
-  server  {{ item }} {{ hostvars[item]['bind_address'] }}:{{ mysql_port }}
+  server    {{ item }} {{ hostvars[item]['bind_address'] }}:{{ mysql_port }} check fastinter 5000 downinter 30000 fall 2 slowstart 99999s
 {% else %}
-  server  {{ item }} {{ hostvars[item]['bind_address'] }}:{{ mysql_port }} backup
+  server    {{ item }} {{ hostvars[item]['bind_address'] }}:{{ mysql_port }} check fastinter 5000 downinter 30000 fall 2 slowstart 99999s
 {% endif %}
+{% endfor %}
+
+listen mysql_ro
+  bind      0.0.0.0:{{ haproxy_mysql_ro_port }}
+  balance   leastconn
+{% for item in groups['slaves'] %}
+  server    {{ item }} {{ hostvars[item]['bind_address'] }}:{{ mysql_port }} check fastinter 5000 downinter 30000 fall 2 slowstart 99999s
 {% endfor %}

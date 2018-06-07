@@ -1,0 +1,68 @@
+- block:
+
+    - name: Checking mysqld status
+      service:
+        name: mysqld
+        state: started
+
+  rescue:
+
+    - name: Installing epel-release
+      yum:
+        name: epel-release
+
+    - name: Create mysql community yum repository file
+      template:
+        src: mysql_community.repo.j2
+        dest: /etc/yum.repos.d/mysql-community.repo
+
+    - name: Installing 'mysql-community-server' and 'mysql-community-client'
+      yum:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+        - mysql-community-server
+        - mysql-community-client
+        - MySQL-python
+        - python2-pip
+        - wget
+        - nano
+        - byobu
+        - net-tools
+      register: install
+      until: install is succeeded
+      retries: 10
+      delay: 10
+
+    - name: Install latest 'pexpect'
+      pip:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - pip
+        - pexpect
+
+    - name: Create /var/log/mysql
+      file:
+        path: /var/log/mysql
+        state: directory
+        owner: mysql
+        group: mysql
+        mode: 0744
+
+    - name: Starting mysqld service
+      service:
+        name: mysqld
+        state: started
+        enabled: yes
+
+    - include_tasks: init_config.yml
+
+  always:
+
+    - name: Updating /etc/my.cnf
+      template:
+        src: mysqld.cnf.j2
+        dest: /etc/my.cnf
+        backup: yes
+      notify: Restart mysqld

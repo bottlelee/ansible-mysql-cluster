@@ -1,0 +1,20 @@
+- block:
+
+    - name: Checking monit status
+      service:
+        name: monit
+        state: started
+
+    - name: Checking monit versioin
+      shell: /usr/local/bin/monit -V | head -n1 | awk '{ print $5 }'
+      changed_when: false
+      register: verChk
+      failed_when: verChk.stdout is version(monit_version, operator='lt', strict=True)
+
+  rescue:
+
+    - include_tasks: install.yml
+
+  always:
+
+    - include_tasks: config_all.yml

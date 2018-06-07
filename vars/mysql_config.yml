@@ -1,13 +1,15 @@
 mysql_version: 5.7
 
-mysql_root_pass: quanduan
+mysql_root_pass: "$vGeal6##"
 
 mysql_repl_user: repl
-mysql_repl_pass: Xx2k8EHU#
+mysql_repl_pass: "$vGeal6##"
 
 mysql_data_dir: /var/lib/mysql
 mysql_port: 3306
-haproxy_mysql_port: 23306
+
+haproxy_mysql_rw_port: 6446
+haproxy_mysql_ro_port: 6447
 
 # Adjust the buffer pool value here, 50%-70% of total RAM.
 # This will set the 'innodb_buffer_pool_size' in mysqld.cnf.

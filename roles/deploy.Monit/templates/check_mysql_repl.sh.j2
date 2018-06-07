@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set +e
+
+# Check gtid_mode
+{% if 'masters' in group_names %}
+GTID_MODE=`/usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "show variables like 'gtid_mode%'" | grep gtid_mode | awk '{ print $NF }'`
+
+if [[ $GTID_MODE != 'ON' ]]; then
+  echo "GTID_MODE is NOT 'ON'."
+  exit 1
+fi
+{% endif %}
+
+{# case $GTID_MODE in
+  OFF )
+    /usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "SET @@GLOBAL.GTID_MODE = OFF_PERMISSIVE;"
+    sleep 5
+    /usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "SET @@GLOBAL.GTID_MODE = ON_PERMISSIVE;"
+    sleep 5
+    /usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "SET @@GLOBAL.GTID_MODE = ON;"
+    ;;
+  OFF_PERMISSIVE )
+    /usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "SET @@GLOBAL.GTID_MODE = ON_PERMISSIVE;"
+    sleep 5
+    /usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "SET @@GLOBAL.GTID_MODE = ON;"
+    ;;
+  ON_PERMISSIVE )
+    /usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "SET @@GLOBAL.GTID_MODE = ON;"
+    ;;
+esac #}
+
+# Check Slave_IO_Running status
+/usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "show slave status\G" | grep 'Slave_IO_Running\: Yes'
+Slave_IO_Running=$?
+
+if [[ $Slave_IO_Running != 0 ]]; then
+  echo "Slave_IO_Running is NOT 'Yes'."
+fi
+
+# Check Slave_SQL_Running status
+/usr/bin/mysql --defaults-extra-file=/root/.mysql_repl_auth.cnf -e "show slave status\G" | grep 'Slave_SQL_Running\: Yes'
+
+Slave_SQL_Running=$?
+
+if [[ $Slave_SQL_Running != 0 ]]; then
+  echo "Slave_SQL_Running is NOT 'Yes'."
+fi
+
+if [[ $Slave_IO_Running != 0 || $Slave_SQL_Running != 0 ]]; then
+  exit 1
+fi

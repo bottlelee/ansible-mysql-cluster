@@ -1,0 +1,19 @@
+check process MYSQL with pidfile /var/run/mysqld/mysqld.pid
+  if failed
+    port {{ mysql_port }}
+    protocol mysql
+    username "{{ mysql_repl_user }}"
+    password "{{ mysql_repl_pass }}"
+  then alert
+
+check program MYSQL-SLAVE-STATUS with path /usr/local/bin/check_mysql_repl.sh as uid 'root' and gid 'root'
+  if status != 0 then alert
+
+check host CHRONY with address {{ bind_address }}
+  start program = "/usr/sbin/service chronyd start"
+  stop program = "/usr/sbin/service chronyd stop"
+  if failed
+    port 123
+    type udp
+    for 5 cycles
+  then restart
