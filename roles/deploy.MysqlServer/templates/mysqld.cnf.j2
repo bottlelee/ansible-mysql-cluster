@@ -34,12 +34,17 @@ bind-address    = 0.0.0.0
 # Disabling symbolic-links is recommended to prevent assorted security risks
 symbolic-links  = 0
 
-innodb_buffer_pool_size = {{ (ansible_memtotal_mb * innodb_buffer_pool_size_percent * 1024 * 1024) | int }}
+{% if 'masters' in group_names %}
+auto_increment_increment = {{ mysql_auto_increment_increment }}
+auto_increment_offset = {{ mysql_auto_increment_offset }}
+{% endif %}
 
-{% for item in mysql_mysqld_config  | sort(attribute='k') %}
+{% for item in mysql_mysqld_config | sort(attribute='k') %}
 {% if item.v is not defined %}
 {{ item.k }}
 {% else %}
 {{ item.k }} = {{ item.v }}
 {% endif %}
 {% endfor %}
+
+innodb_buffer_pool_size = {{ (ansible_memtotal_mb * innodb_buffer_pool_size_percent * 1024 * 1024) | int }}

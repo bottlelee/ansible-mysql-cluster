@@ -63,6 +63,16 @@ Vagrant.configure("2") do |config|
             "slaves" => ["mysql-slave-03"],
             "mysqls:children" => ["slaves", "masters"]
           }
+          ansible.host_vars = {
+            "mysql-master-01" => {
+              "mysql_auto_increment_increment" => 2,
+              "mysql_auto_increment_offset" => 1
+            },
+            "mysql-master-02" => {
+              "mysql_auto_increment_increment" => 2,
+              "mysql_auto_increment_offset" => 2
+            }
+          }
           ansible.limit = "all"
           ansible.playbook = "play-all.yml"
         end
